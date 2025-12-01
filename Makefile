@@ -1,6 +1,10 @@
 .PHONY: all
 all: build
 
+# Path to custom rustc (modify if needed)
+CUSTOM_RUSTC_BIN ?= $(HOME)/repo/rust/build/x86_64-unknown-linux-gnu/stage2/bin/rustc
+CUSTOM_RUSTC_LIB ?= $(HOME)/repo/rust/build/x86_64-unknown-linux-gnu/stage2/lib
+
 .PHONY: format
 format:
 	cd charon && $(MAKE) format
@@ -36,6 +40,43 @@ build-dev-charon-rust:
 	mkdir -p bin
 	cp -f charon/target/debug/charon bin
 	cp -f charon/target/debug/charon-driver bin
+
+.PHONY: build-custom
+build-custom: build-custom-charon-rust
+
+# Build Charon with custom rustc in release mode
+.PHONY: build-custom-charon-rust
+build-custom-charon-rust:
+	@echo "Building Charon (release) with custom rustc from: $(CUSTOM_RUSTC_BIN)"
+	cd charon && \
+		RUSTC="$(CUSTOM_RUSTC_BIN)" \
+		LD_LIBRARY_PATH="$(CUSTOM_RUSTC_LIB):$$LD_LIBRARY_PATH" \
+		RUSTC_BOOTSTRAP=1 \
+		CHARON_TOOLCHAIN_IS_IN_PATH=1 \
+		CARGO_PROFILE_RELEASE_DEBUG=true \
+		cargo build --release
+	mkdir -p bin
+	cp -f charon/target/release/charon bin
+	cp -f charon/target/release/charon-driver bin
+	@echo "Done! Use ./scripts/run-charon-with-custom-rustc.sh to run with your custom rustc"
+
+.PHONY: build-custom-dev
+build-custom-dev: build-custom-dev-charon-rust
+
+# Build Charon with custom rustc in debug mode
+.PHONY: build-custom-dev-charon-rust
+build-custom-dev-charon-rust:
+	@echo "Building Charon (debug) with custom rustc from: $(CUSTOM_RUSTC_BIN)"
+	cd charon && \
+		RUSTC="$(CUSTOM_RUSTC_BIN)" \
+		LD_LIBRARY_PATH="$(CUSTOM_RUSTC_LIB):$$LD_LIBRARY_PATH" \
+		RUSTC_BOOTSTRAP=1 \
+		CHARON_TOOLCHAIN_IS_IN_PATH=1 \
+		cargo build
+	mkdir -p bin
+	cp -f charon/target/debug/charon bin
+	cp -f charon/target/debug/charon-driver bin
+	@echo "Done! Use ./scripts/run-charon-with-custom-rustc.sh to run with your custom rustc"
 
 .PHONY: build-charon-ml
 build-charon-ml: charon-ml/src/CharonVersion.ml
