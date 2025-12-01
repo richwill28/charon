@@ -91,6 +91,65 @@ tests with `make test`.
 
 Alternatively, you can use Nix and do `nix develop` and all dependencies should be made available.
 
+### Building with Custom Rustc
+
+If you need to build Charon with a modified version of rustc (e.g. for testing experimental features):
+
+```shell
+# Build Charon in debug mode with custom rustc
+make build-custom-dev
+
+# Or in release mode
+make build-custom
+```
+
+This requires a custom rustc build. To set it up:
+
+1. **Build rustc:**
+   ```shell
+   cd ~/repo/rust
+   ./x build --stage 2
+   ```
+
+2. **Generate and install distribution artifacts:**
+
+   The rustc build alone doesn't include all necessary files. Generate distribution packages:
+   ```shell
+   ./x dist rust-src rustc-dev llvm-tools --stage 2
+   ```
+
+   This creates tarballs in `build/dist/`. Install them into your sysroot:
+   ```shell
+   cd build/dist
+
+   # Extract and install rust-src
+   tar -xzf rust-src-*.tar.gz
+   cd rust-src-*/
+   ./install.sh --prefix=$HOME/repo/rust/build/x86_64-unknown-linux-gnu/stage2 --disable-ldconfig
+   cd ..
+
+   # Extract and install rustc-dev
+   tar -xzf rustc-dev-*.tar.gz
+   cd rustc-dev-*/
+   ./install.sh --prefix=$HOME/repo/rust/build/x86_64-unknown-linux-gnu/stage2 --disable-ldconfig
+   cd ..
+
+   # Extract and install llvm-tools
+   tar -xzf llvm-tools-*.tar.gz
+   cd llvm-tools-*/
+   ./install.sh --prefix=$HOME/repo/rust/build/x86_64-unknown-linux-gnu/stage2 --disable-ldconfig
+   cd ../..
+   ```
+
+You can customize the rustc path by setting `CUSTOM_RUSTC_BIN` and `CUSTOM_RUSTC_LIB` in the Makefile.
+
+Run Charon with your custom rustc using the wrapper script:
+
+```shell
+./scripts/run-charon-with-custom-rustc.sh rustc [OPTIONS] [-- <RUSTC>...]
+./scripts/run-charon-with-custom-rustc.sh cargo [OPTIONS] [-- <CARGO>...]
+```
+
 ## Documentation
 
 You can access the (work-in-progress) Rust documentation
