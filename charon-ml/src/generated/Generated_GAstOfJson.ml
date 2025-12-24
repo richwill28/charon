@@ -1540,13 +1540,17 @@ and rvalue_of_json (ctx : of_json_ctx) (js : json) : (rvalue, string) result =
           ( "Ref",
             `Assoc
               [
-                ("place", place); ("kind", kind); ("ptr_metadata", ptr_metadata);
+                ("place", place);
+                ("kind", kind);
+                ("ptr_metadata", ptr_metadata);
+                ("view", view);
               ] );
         ] ->
         let* place = place_of_json ctx place in
         let* kind = borrow_kind_of_json ctx kind in
         let* ptr_metadata = operand_of_json ctx ptr_metadata in
-        Ok (RvRef (place, kind, ptr_metadata))
+        let* view = option_of_json (list_of_json view_field_of_json) ctx view in
+        Ok (RvRef (place, kind, ptr_metadata, view))
     | `Assoc
         [
           ( "RawPtr",
@@ -1972,11 +1976,12 @@ and ty_of_json (ctx : of_json_ctx) (js : json) : (ty, string) result =
         let* literal = literal_type_of_json ctx literal in
         Ok (TLiteral literal)
     | `String "Never" -> Ok TNever
-    | `Assoc [ ("Ref", `List [ x_0; x_1; x_2 ]) ] ->
+    | `Assoc [ ("Ref", `List [ x_0; x_1; x_2; x_3 ]) ] ->
         let* x_0 = region_of_json ctx x_0 in
         let* x_1 = ty_of_json ctx x_1 in
         let* x_2 = ref_kind_of_json ctx x_2 in
-        Ok (TRef (x_0, x_1, x_2))
+        let* x_3 = option_of_json (list_of_json view_field_of_json) ctx x_3 in
+        Ok (TRef (x_0, x_1, x_2, x_3))
     | `Assoc [ ("RawPtr", `List [ x_0; x_1 ]) ] ->
         let* x_0 = ty_of_json ctx x_0 in
         let* x_1 = ref_kind_of_json ctx x_1 in
@@ -2211,4 +2216,14 @@ and vector_of_json :
     | js ->
         let* list = list_of_json (option_of_json arg1_of_json) ctx js in
         Ok (List.filter_map (fun x -> x) list)
+    | _ -> Error "")
+
+and view_field_of_json (ctx : of_json_ctx) (js : json) :
+    (view_field, string) result =
+  combine_error_msgs js __FUNCTION__
+    (match js with
+    | `Assoc [ ("path", path); ("mutbl", mutbl) ] ->
+        let* path = list_of_json string_of_json ctx path in
+        let* mutbl = ref_kind_of_json ctx mutbl in
+        Ok ({ path; mutbl } : view_field)
     | _ -> Error "")

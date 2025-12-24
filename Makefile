@@ -27,6 +27,14 @@ build: build-charon-rust build-charon-ml
 .PHONY: build-dev
 build-dev: build-dev-charon-rust build-dev-charon-ml
 
+# Build with custom rustc in release mode
+.PHONY: build-custom
+build-custom: build-custom-charon-rust
+
+# Build with custom rustc in dev mode
+.PHONY: build-custom-dev
+build-custom-dev: build-custom-dev-charon-rust
+
 .PHONY: build-charon-rust
 build-charon-rust:
 	cd charon && $(MAKE)
@@ -40,9 +48,6 @@ build-dev-charon-rust:
 	mkdir -p bin
 	cp -f charon/target/debug/charon bin
 	cp -f charon/target/debug/charon-driver bin
-
-.PHONY: build-custom
-build-custom: build-custom-charon-rust
 
 # Build Charon with custom rustc in release mode
 .PHONY: build-custom-charon-rust
@@ -59,9 +64,6 @@ build-custom-charon-rust:
 	cp -f charon/target/release/charon bin
 	cp -f charon/target/release/charon-driver bin
 	@echo "Done! Use ./scripts/run-charon-with-custom-rustc.sh to run with your custom rustc"
-
-.PHONY: build-custom-dev
-build-custom-dev: build-custom-dev-charon-rust
 
 # Build Charon with custom rustc in debug mode
 .PHONY: build-custom-dev-charon-rust
@@ -122,6 +124,29 @@ generate-ml:
 .PHONY: generate-ml-keep-llbc
 generate-ml-keep-llbc:
 	CHARON_ML_REUSE_LLBC=1 $(MAKE) generate-ml
+
+# Generate ml code with custom rustc
+.PHONY: generate-ml-custom
+generate-ml-custom:
+	@echo "Generating ML code with custom rustc from: $(CUSTOM_RUSTC_BIN)"
+	cd charon && \
+		RUSTC="$(CUSTOM_RUSTC_BIN)" \
+		LD_LIBRARY_PATH="$(CUSTOM_RUSTC_LIB):$$LD_LIBRARY_PATH" \
+		RUSTC_BOOTSTRAP=1 \
+		CHARON_TOOLCHAIN_IS_IN_PATH=1 \
+		cargo build --release && \
+		RUSTC="$(CUSTOM_RUSTC_BIN)" \
+		LD_LIBRARY_PATH="$(CUSTOM_RUSTC_LIB):$$LD_LIBRARY_PATH" \
+		RUSTC_BOOTSTRAP=1 \
+		CHARON_TOOLCHAIN_IS_IN_PATH=1 \
+		cargo run --release --bin generate-ml
+	cd charon-ml && $(MAKE) format 2> /dev/null
+	@echo "Done! ML code generated with custom rustc"
+
+# Same as `generate-ml-custom` but don't re-run charon on itself
+.PHONY: generate-ml-custom-keep-llbc
+generate-ml-custom-keep-llbc:
+	CHARON_ML_REUSE_LLBC=1 $(MAKE) generate-ml-custom
 
 # Run Charon on rustc's ui test suite
 .PHONY: rustc-tests

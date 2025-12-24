@@ -577,7 +577,7 @@ and ty =
           Note that we eliminate the variables which have this type in a
           micro-pass. As statements don't have types, this type disappears
           eventually disappears from the AST. *)
-  | TRef of region * ty * ref_kind  (** A borrow *)
+  | TRef of region * ty * ref_kind * view_field list option  (** A borrow *)
   | TRawPtr of ty * ref_kind  (** A raw pointer. *)
   | TTraitType of trait_ref * trait_item_name
       (** A trait associated type
@@ -633,6 +633,8 @@ and type_id =
 
 (** A type variable in a signature or binder. *)
 and type_param = (type_var_id, string) indexed_var
+
+and view_field = { path : string list; mutbl : ref_kind }
 [@@deriving
   show,
   eq,
