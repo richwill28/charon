@@ -417,15 +417,17 @@ impl BodyTransCtx<'_, '_, '_> {
                 // Remark: we could desugar this into a function call later.
                 Ok(Rvalue::Repeat(operand, t, c))
             }
-            hax::Rvalue::Ref(_region, borrow_kind, place) => {
+            hax::Rvalue::Ref(_region, borrow_kind, place, view) => {
                 let place = self.translate_place(span, place)?;
                 let borrow_kind = translate_borrow_kind(*borrow_kind);
+                let view = self.translate_view(view);
                 Ok(Rvalue::Ref {
                     place,
                     kind: borrow_kind,
                     // Use `()` as a placeholder now.
                     // Will be fixed by the cleanup pass `insert_ptr_metadata`.
                     ptr_metadata: Operand::mk_const_unit(),
+                    view,
                 })
             }
             hax::Rvalue::RawPtr(mtbl, place) => {

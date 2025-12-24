@@ -151,7 +151,7 @@ impl<'tcx, 'ctx> ItemTransCtx<'tcx, 'ctx> {
                 let tref = TypeDeclRef::new(TypeId::Tuple, args);
                 TyKind::Adt(tref)
             }
-            hax::TyKind::Ref(region, ty, mutability) => {
+            hax::TyKind::Ref(region, ty, mutability, view) => {
                 trace!("Ref");
 
                 let region = self.translate_region(span, region)?;
@@ -161,7 +161,8 @@ impl<'tcx, 'ctx> ItemTransCtx<'tcx, 'ctx> {
                 } else {
                     RefKind::Shared
                 };
-                TyKind::Ref(region, ty, kind)
+                let view = self.translate_view(view);
+                TyKind::Ref(region, ty, kind, view)
             }
             hax::TyKind::RawPtr(ty, mutbl) => {
                 trace!("RawPtr: {:?}", (ty, mutbl));
@@ -794,5 +795,20 @@ impl<'tcx, 'ctx> ItemTransCtx<'tcx, 'ctx> {
             repr_algo,
             align_modif: align_mod,
         }
+    }
+
+    pub(crate) fn translate_view(&self, view: &Option<hax::View>) -> Option<View> {
+        view.as_ref().map(|v| {
+            v.into_iter()
+                .map(|field| ViewField {
+                    path: field.path.iter().map(|s| s.to_string()).collect(),
+                    mutbl: if field.mutbl {
+                        RefKind::Mut
+                    } else {
+                        RefKind::Shared
+                    },
+                })
+                .collect()
+        })
     }
 }

@@ -84,6 +84,7 @@ impl<'a, 'b> IndexVisitor<'a, 'b> {
             Region::Erased,
             subplace.ty().clone(),
             RefKind::mutable(mut_access),
+            None,
         )
         .into_ty();
 
@@ -102,6 +103,7 @@ impl<'a, 'b> IndexVisitor<'a, 'b> {
                 Region::Erased,
                 output_inner_ty.clone(),
                 RefKind::mutable(mut_access),
+                None,
             )
             .into_ty()
         };
@@ -120,6 +122,7 @@ impl<'a, 'b> IndexVisitor<'a, 'b> {
                     place: subplace.clone(),
                     kind: BorrowKind::mutable(mut_access),
                     ptr_metadata,
+                    view: None,
                 },
             );
             self.statements.push(Statement::new(self.span, kind));

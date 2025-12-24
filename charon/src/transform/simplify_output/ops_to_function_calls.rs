@@ -18,8 +18,8 @@ fn transform_st(s: &mut Statement) {
             ),
         ) => {
             if let (
-                TyKind::Ref(_, deref!(TyKind::Adt(tref1)), kind1),
-                TyKind::Ref(_, deref!(TyKind::Adt(tref2)), kind2),
+                TyKind::Ref(_, deref!(TyKind::Adt(tref1)), kind1, _),
+                TyKind::Ref(_, deref!(TyKind::Adt(tref2)), kind2, _),
             ) = (src_ty.kind(), tgt_ty.kind())
                 && matches!(tref1.id, TypeId::Builtin(BuiltinTy::Array))
                 && matches!(tref2.id, TypeId::Builtin(BuiltinTy::Slice))

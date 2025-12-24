@@ -244,12 +244,13 @@ impl ItemTransCtx<'_, '_> {
             .map(|ty| -> Result<Field, Error> {
                 let mut ty = self.translate_ty(span, ty)?;
                 // We supply fresh regions for the by-ref upvars.
-                if let TyKind::Ref(Region::Erased, deref_ty, kind) = ty.kind() {
+                if let TyKind::Ref(Region::Erased, deref_ty, kind, view) = ty.kind() {
                     let region_id = by_ref_upvar_regions.next().unwrap();
                     ty = TyKind::Ref(
                         Region::Var(DeBruijnVar::new_at_zero(region_id)),
                         deref_ty.clone(),
                         *kind,
+                        view.clone(),
                     )
                     .into_ty();
                 }
@@ -306,7 +307,7 @@ impl ItemTransCtx<'_, '_> {
                 } else {
                     RefKind::Mut
                 };
-                TyKind::Ref(r, state_ty, mutability).into_ty()
+                TyKind::Ref(r, state_ty, mutability, None).into_ty()
             }
         };
 
@@ -450,7 +451,7 @@ impl ItemTransCtx<'_, '_> {
                 let args = builder.new_var(Some("args".to_string()), signature.inputs[1].clone());
                 let deref_state = state.deref();
                 let reborrow_ty =
-                    TyKind::Ref(Region::Erased, deref_state.ty.clone(), RefKind::Shared).into_ty();
+                    TyKind::Ref(Region::Erased, deref_state.ty.clone(), RefKind::Shared, None).into_ty();
                 let reborrow = builder.new_var(None, reborrow_ty);
 
                 builder.push_statement(StatementKind::Assign(
@@ -460,6 +461,7 @@ impl ItemTransCtx<'_, '_> {
                         place: deref_state,
                         kind: BorrowKind::Shared,
                         ptr_metadata: Operand::mk_const_unit(),
+                        view: None,
                     },
                 ));
 

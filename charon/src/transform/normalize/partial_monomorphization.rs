@@ -292,7 +292,7 @@ impl<'a> PartialMonomorphizer<'a> {
             let mut graph: DiGraphMap<Option<TypeDeclId>, ()> = Default::default();
             for (id, tdecl) in ctx.translated.type_decls.iter_indexed() {
                 tdecl.dyn_visit(|x: &Ty| match x.kind() {
-                    TyKind::Ref(_, _, RefKind::Mut) => {
+                    TyKind::Ref(_, _, RefKind::Mut, _) => {
                         graph.add_edge(None, Some(id), ());
                     }
                     TyKind::Adt(tref) if let TypeId::Adt(other_id) = tref.id => {
@@ -333,8 +333,8 @@ impl<'a> PartialMonomorphizer<'a> {
     /// type and partially monomorphized any ADT references.
     fn is_infected(&self, ty: &Ty) -> bool {
         match ty.kind() {
-            TyKind::Ref(_, _, RefKind::Mut) => true,
-            TyKind::Ref(_, ty, _) | TyKind::RawPtr(ty, _) => self.is_infected(ty),
+            TyKind::Ref(_, _, RefKind::Mut, _) => true,
+            TyKind::Ref(_, ty, _, _) | TyKind::RawPtr(ty, _) => self.is_infected(ty),
             TyKind::Adt(tref) => {
                 let ty_infected =
                     matches!(&tref.id, TypeId::Adt(id) if self.infected_types.contains(id));

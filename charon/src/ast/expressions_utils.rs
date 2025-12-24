@@ -68,7 +68,7 @@ impl Place {
     pub fn deref(self) -> Place {
         use TyKind::*;
         let proj_ty = match self.ty.kind() {
-            Ref(_, ty, _) | RawPtr(ty, _) => ty.clone(),
+            Ref(_, ty, _, _) | RawPtr(ty, _) => ty.clone(),
             Adt(tref) if matches!(tref.id, TypeId::Builtin(BuiltinTy::Box)) => {
                 tref.generics.types[0].clone()
             }
@@ -137,7 +137,7 @@ impl ProjectionElem {
             Deref => {
                 use TyKind::*;
                 match ty.kind() {
-                    Ref(_, ty, _) | RawPtr(ty, _) => ty.clone(),
+                    Ref(_, ty, _, _) | RawPtr(ty, _) => ty.clone(),
                     Adt(tref) if matches!(tref.id, TypeId::Builtin(BuiltinTy::Box)) => {
                         tref.generics.types[0].clone()
                     }

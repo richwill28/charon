@@ -670,6 +670,21 @@ pub enum RefKind {
     Shared,
 }
 
+pub type View = Vec<ViewField>;
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, Drive, DriveMut)]
+pub struct ViewField {
+    #[drive(skip)]
+    pub path: Vec<String>,
+    pub mutbl: RefKind,
+}
+
+impl ViewField {
+    pub fn new(path: Vec<String>, mutbl: RefKind) -> Self {
+        Self { path, mutbl }
+    }
+}
+
 /// Type identifier.
 ///
 /// Allows us to factorize the code for built-in types, adts and tuples
@@ -830,7 +845,7 @@ pub enum TyKind {
     Never,
     // We don't support floating point numbers on purpose (for now)
     /// A borrow
-    Ref(Region, Ty, RefKind),
+    Ref(Region, Ty, RefKind, Option<View>),
     /// A raw pointer.
     RawPtr(Ty, RefKind),
     /// A trait associated type

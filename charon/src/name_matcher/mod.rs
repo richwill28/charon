@@ -275,7 +275,7 @@ impl PatTy {
     pub fn matches_ty(&self, ctx: &TranslatedCrate, ty: &Ty) -> bool {
         match (self, ty.kind()) {
             (PatTy::Pat(p), _) => p.matches_ty(ctx, ty),
-            (PatTy::Ref(pat_mtbl, p_ty), TyKind::Ref(_, ty, ty_mtbl)) => {
+            (PatTy::Ref(pat_mtbl, p_ty), TyKind::Ref(_, ty, ty_mtbl, _)) => {
                 pat_mtbl == ty_mtbl && p_ty.matches_ty(ctx, ty)
             }
             _ => false,
