@@ -35,6 +35,20 @@ let (var_id_to_string
 let (var_to_string [@ocaml.alert deprecated "use [local_to_string] instead"]) =
   local_to_string
 
+let view_to_string (view : view_field list option) : string =
+  match view with
+  | None -> ""
+  | Some fields ->
+      let field_strs =
+        List.map
+          (fun vf ->
+            let mutbl_str = if vf.mutbl = RMut then "mut " else "" in
+            let path_str = String.concat "." vf.path in
+            mutbl_str ^ path_str)
+          fields
+      in
+      "{" ^ String.concat ", " field_strs ^ "}"
+
 let rec projection_elem_to_string (env : 'a fmt_env) (sub : string)
     (pe : projection_elem) : string =
   match pe with
@@ -149,15 +163,18 @@ and operand_to_string (env : 'a fmt_env) (op : operand) : string =
 and rvalue_to_string (env : 'a fmt_env) (rv : rvalue) : string =
   match rv with
   | Use op -> operand_to_string env op
-  | RvRef (p, bk, op) -> begin
+  | RvRef (p, bk, op, v) -> begin
       let op = operand_to_string env op in
       let p = place_to_string env p in
+      let v = view_to_string v in
       match bk with
-      | BShared -> "&(" ^ p ^ ", " ^ op ^ ")"
-      | BMut -> "&mut (" ^ p ^ ", " ^ op ^ ")"
-      | BTwoPhaseMut -> "&two-phase (" ^ p ^ ", " ^ op ^ ")"
-      | BUniqueImmutable -> "&uniq (" ^ p ^ ", " ^ op ^ ")"
-      | BShallow -> "&shallow (" ^ p ^ ", " ^ op ^ ")"
+      | BShared ->
+          let sep = if v = "" then "" else " " in
+          "&" ^ v ^ sep ^ "(" ^ p ^ ", " ^ op ^ ")"
+      | BMut -> "&mut " ^ v ^ " (" ^ p ^ ", " ^ op ^ ")"
+      | BTwoPhaseMut -> "&two-phase " ^ v ^ " (" ^ p ^ ", " ^ op ^ ")"
+      | BUniqueImmutable -> "&uniq " ^ v ^ " (" ^ p ^ ", " ^ op ^ ")"
+      | BShallow -> "&shallow " ^ v ^ " (" ^ p ^ ", " ^ op ^ ")"
     end
   | RawPtr (p, pk, op) -> begin
       let op = operand_to_string env op in

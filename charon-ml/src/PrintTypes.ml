@@ -153,6 +153,20 @@ let region_to_string (env : 'a fmt_env) (r : region) : string =
   | RErased -> "'_"
   | RVar var -> region_db_var_to_string env var
 
+let view_to_string (view : view_field list option) : string =
+  match view with
+  | None -> ""
+  | Some fields ->
+      let field_strs =
+        List.map
+          (fun vf ->
+            let mutbl_str = if vf.mutbl = RMut then "mut " else "" in
+            let path_str = String.concat "." vf.path in
+            mutbl_str ^ path_str)
+          fields
+      in
+      "{" ^ String.concat ", " field_strs ^ "}"
+
 let region_binder_to_string (value_to_string : 'a fmt_env -> 'c -> string)
     (env : 'a fmt_env) (rb : 'c region_binder) : string =
   let env = fmt_env_push_regions env rb.binder_regions in
@@ -268,12 +282,14 @@ and ty_to_string (env : 'a fmt_env) (ty : ty) : string =
   | TTraitType (trait_ref, type_name) ->
       let trait_ref = trait_ref_to_string env trait_ref in
       trait_ref ^ "::" ^ type_name
-  | TRef (r, rty, ref_kind) -> (
+  | TRef (r, rty, ref_kind, view) -> (
       match ref_kind with
       | RMut ->
-          "&" ^ region_to_string env r ^ " mut (" ^ ty_to_string env rty ^ ")"
+          "&" ^ region_to_string env r ^ " mut " ^ view_to_string view ^ " ("
+          ^ ty_to_string env rty ^ ")"
       | RShared ->
-          "&" ^ region_to_string env r ^ " (" ^ ty_to_string env rty ^ ")")
+          "&" ^ region_to_string env r ^ " " ^ view_to_string view ^ " ("
+          ^ ty_to_string env rty ^ ")")
   | TRawPtr (rty, ref_kind) -> (
       match ref_kind with
       | RMut -> "*mut " ^ ty_to_string env rty

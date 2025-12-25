@@ -1,9 +1,7 @@
-//@ check-pass
+//@ charon-args=--skip-borrowck
 
-// TODO: This test is marked as check-pass, but it should actually fail borrowck
-// until view types are fully integrated with the borrow checker. Once borrow
-// checker support is implemented, this should compile and demonstrate disjoint
-// field borrowing through view types.
+// TODO(view): We skip borrow checking because view types are not yet integrated
+// with rustc's borrow checker.
 
 // This is the motivating example from the "View Types in Rust" paper (SPLASH 2025).
 // It demonstrates the core problem that view types solve: allowing a method to

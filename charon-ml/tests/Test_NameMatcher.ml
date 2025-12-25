@@ -33,6 +33,11 @@ let parse_tests () =
       "{fn (@T, @U) -> u32}";
       "{*const @T}";
       "{*mut @T}";
+      "x::{&'R {field} @T}";
+      "x::{&'R mut {mut field} @T}";
+      "x::{&'R {field1, field2} @T}";
+      "x::{&'R mut {mut field1, field2, mut field3} @T}";
+      "core::{&'R {a.b, c.d.e} @T}::method";
     ]
   in
   let _ = List.map parse_pattern patterns in
@@ -50,6 +55,8 @@ let name_map_tests () =
       "a::c";
       "a::{Type1<'a, @T>}::h";
       "a::{Type1<'b, @T>}::e";
+      "S::{&'a {field} Self}::method";
+      "S::{&'a mut {mut field1, field2} Self}::method2";
     ]
   in
   let bindings = List.mapi (fun i p -> (parse_pattern p, i)) bindings in

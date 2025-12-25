@@ -13,7 +13,7 @@ open Ast
 %token LEFT_CURLY RIGHT_CURLY
 %token LEFT_SQUARE RIGHT_SQUARE
 %token LEFT_ANGLE RIGHT_ANGLE
-%token SEMICOL AMPERSAND MUT CONST COMMA EOF FN ARROW STAR HASH
+%token SEMICOL AMPERSAND MUT CONST COMMA EOF FN ARROW STAR HASH DOT
 
 /* Types */
 
@@ -24,6 +24,10 @@ open Ast
 %type <region> region
 %type <generic_args> generic_args
 %type <generic_arg> generic_arg
+%type <Ast.view_field list option> view_opt
+%type <Ast.view_field list> view_fields
+%type <Ast.view_field> view_field
+%type <string list> ident_path
 
 /* Entry point */
 
@@ -64,10 +68,10 @@ expr:
   | LEFT_SQUARE; ty=expr; SEMICOL; cg=INT; RIGHT_SQUARE {
       EPrimAdt (TArray, [GExpr ty; GValue (LInt cg)]) }
   // References
-  | AMPERSAND; r=region; MUT; ty=expr {
-      ERef (r, ty, RMut) }
-  | AMPERSAND; r=region; ty=expr {
-      ERef (r, ty, RShared) }
+  | AMPERSAND; r=region; MUT; v=view_opt; ty=expr {
+      ERef (r, ty, RMut, v) }
+  | AMPERSAND; r=region; v=view_opt; ty=expr {
+      ERef (r, ty, RShared, v) }
   // Variables
   | v=VAR { EVar v }
   // Arrows
@@ -99,3 +103,19 @@ generic_arg:
   | v=INT { GValue (LInt v) }
   // Regions
   | r=region { GRegion r }
+
+view_opt:
+  | LEFT_CURLY; fields=view_fields; RIGHT_CURLY { Some fields }
+  | /* empty */ { None }
+
+view_fields:
+  | f=view_field { [f] }
+  | f=view_field; COMMA; rest=view_fields { f :: rest }
+
+view_field:
+  | MUT; path=ident_path { { path = path; mutbl = RMut } }
+  | path=ident_path { { path = path; mutbl = RShared } }
+
+ident_path:
+  | id=IDENT { [id] }
+  | id=IDENT; DOT; rest=ident_path { id :: rest }
