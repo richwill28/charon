@@ -27,6 +27,7 @@ doc:
 .PHONY: clean-generated
 clean-generated:
 	find tests -name '*.llbc' -delete
+	find tests -name '*.rlib' -delete
 
 .PHONY: clean
 clean: clean-generated

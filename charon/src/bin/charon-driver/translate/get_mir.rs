@@ -74,6 +74,16 @@ fn get_mir_for_def_id_and_level<'tcx>(
     match def_id.promoted_id() {
         None => {
             if let Some(local_def_id) = rust_def_id.as_local() {
+                // TODO(view): We should revisit this.
+                // Trivial consts (e.g. `const FOO: usize = 42`) don't have MIR bodies.
+                // rustc optimizes them into constant values with no executable code.
+                // Attempting to query any MIR for them will panic, so return None early.
+                // See: https://github.com/rust-lang/rust/commit/775da711c60ab83dc23af428e92b6be19b3d38b2
+                if tcx.is_trivial_const(local_def_id) {
+                    trace!("skipping trivial const");
+                    return None;
+                }
+
                 match level {
                     MirLevel::Built => {
                         let body = tcx.mir_built(local_def_id);
