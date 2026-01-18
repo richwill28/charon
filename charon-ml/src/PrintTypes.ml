@@ -153,7 +153,7 @@ let region_to_string (env : 'a fmt_env) (r : region) : string =
   | RErased -> "'_"
   | RVar var -> region_db_var_to_string env var
 
-let view_to_string (view : view_field list option) : string =
+let view_to_string (view : ty_view_field list option) : string =
   match view with
   | None -> ""
   | Some fields ->

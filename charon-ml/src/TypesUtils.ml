@@ -134,7 +134,7 @@ let ty_as_slice (ty : ty) : ty =
   | Some ty -> ty
   | None -> raise (Failure "Unreachable")
 
-let ty_as_ref (ty : ty) : region * ty * ref_kind * view_field list option =
+let ty_as_ref (ty : ty) : region * ty * ref_kind * ty_view_field list option =
   match ty with
   | TRef (r, ref_ty, kind, view) -> (r, ref_ty, kind, view)
   | _ -> raise (Failure "Unreachable")
@@ -259,13 +259,13 @@ let ty_as_box (box_ty : ty) : ty =
 
 (** Deconstruct a type of the form [&T] or [&mut T] to retrieve the [T] (and the
     borrow kind, etc.) *)
-let ty_get_ref (ty : ty) : region * ty * ref_kind * view_field list option =
+let ty_get_ref (ty : ty) : region * ty * ref_kind * ty_view_field list option =
   match ty with
   | TRef (r, ty, ref_kind, view) -> (r, ty, ref_kind, view)
   | _ -> raise (Failure "Not a ref type")
 
 let mk_ref_ty (r : region) (ty : ty) (ref_kind : ref_kind)
-    (view : view_field list option) : ty =
+    (view : ty_view_field list option) : ty =
   TRef (r, ty, ref_kind, view)
 
 (** Make a box type *)

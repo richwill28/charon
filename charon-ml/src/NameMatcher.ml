@@ -454,7 +454,7 @@ let rec get_all_field_paths (ctx : 'fun_body ctx) (ty : T.ty) :
   | _ -> None
 
 let match_view (ctx : 'fun_body ctx) (pointee_ty : T.ty)
-    (pview : view_field list option) (view : T.view_field list option) : bool =
+    (pview : view_field list option) (view : T.ty_view_field list option) : bool =
   match (pview, view) with
   | None, None -> true
   | None, Some vfields -> (
@@ -462,7 +462,7 @@ let match_view (ctx : 'fun_body ctx) (pointee_ty : T.ty)
       | None -> false
       | Some all_paths ->
           let vfield_paths =
-            List.map (fun (vf : T.view_field) -> vf.path) vfields
+            List.map (fun (vf : T.ty_view_field) -> vf.path) vfields
           in
           List.for_all (fun path -> List.mem path vfield_paths) all_paths)
   | Some pfields, None -> (
@@ -875,13 +875,13 @@ let ref_kind_to_pattern (rk : T.ref_kind) : ref_kind =
   | RMut -> RMut
   | RShared -> RShared
 
-let view_to_pattern (view : T.view_field list option) : view_field list option =
+let view_to_pattern (view : T.ty_view_field list option) : view_field list option =
   match view with
   | None -> None
   | Some vfields ->
       Some
         (List.map
-           (fun (vf : T.view_field) ->
+           (fun (vf : T.ty_view_field) ->
              { path = vf.path; mutbl = ref_kind_to_pattern vf.mutbl })
            vfields)
 
