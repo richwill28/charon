@@ -1268,9 +1268,12 @@ impl<C: AstFormatter> FmtWithCtx<C> for Rvalue {
                         if i > 0 {
                             write!(f, ", ")?;
                         }
-                        match field.mutbl {
-                            RefKind::Mut => write!(f, "mut ")?,
-                            RefKind::Shared => {}
+                        match field.kind {
+                            BorrowKind::Shared => {}
+                            BorrowKind::Mut => write!(f, "mut ")?,
+                            BorrowKind::TwoPhaseMut => write!(f, "two-phase-mut ")?,
+                            BorrowKind::UniqueImmutable => write!(f, "uniq ")?,
+                            BorrowKind::Shallow => write!(f, "shallow ")?,
                         }
                         write!(f, "{}", field.path.join("."))?;
                     }

@@ -118,6 +118,7 @@ pub enum FieldProjKind {
     Debug,
     PartialEq,
     Eq,
+    Hash,
     Copy,
     Clone,
     EnumIsA,
@@ -152,6 +153,21 @@ pub enum BorrowKind {
     ///
     /// See <https://doc.rust-lang.org/beta/nightly-rustc/rustc_middle/mir/enum.MutBorrowKind.html#variant.ClosureCapture>.
     UniqueImmutable,
+}
+
+pub type View = Vec<ViewField>;
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, Drive, DriveMut)]
+pub struct ViewField {
+    #[drive(skip)]
+    pub path: Vec<String>,
+    pub kind: BorrowKind,
+}
+
+impl ViewField {
+    pub fn new(path: Vec<String>, kind: BorrowKind) -> Self {
+        Self { path, kind }
+    }
 }
 
 /// Unary operation

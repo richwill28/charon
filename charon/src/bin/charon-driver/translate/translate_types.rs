@@ -797,10 +797,10 @@ impl<'tcx, 'ctx> ItemTransCtx<'tcx, 'ctx> {
         }
     }
 
-    pub(crate) fn translate_view(&self, view: &Option<hax::View>) -> Option<View> {
+    pub(crate) fn translate_view(&self, view: &Option<hax::TyView>) -> Option<TyView> {
         view.as_ref().map(|v| {
             v.into_iter()
-                .map(|field| ViewField {
+                .map(|field| TyViewField {
                     path: field.path.iter().map(|s| s.to_string()).collect(),
                     mutbl: if field.mutbl {
                         RefKind::Mut

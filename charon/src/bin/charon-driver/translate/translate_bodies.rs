@@ -94,6 +94,17 @@ fn translate_borrow_kind(borrow_kind: hax::BorrowKind) -> BorrowKind {
     }
 }
 
+fn translate_view(view: &Option<hax::View>) -> Option<View> {
+    view.as_ref().map(|v| {
+        v.into_iter()
+            .map(|field| ViewField {
+                path: field.path.iter().map(|s| s.to_string()).collect(),
+                kind: translate_borrow_kind(field.kind),
+            })
+            .collect()
+    })
+}
+
 impl BodyTransCtx<'_, '_, '_> {
     pub(crate) fn translate_local(&self, local: &hax::Local) -> Option<LocalId> {
         use rustc_index::Idx;
@@ -420,7 +431,7 @@ impl BodyTransCtx<'_, '_, '_> {
             hax::Rvalue::Ref(_region, borrow_kind, place, view) => {
                 let place = self.translate_place(span, place)?;
                 let borrow_kind = translate_borrow_kind(*borrow_kind);
-                let view = self.translate_view(view);
+                let view = translate_view(view);
                 Ok(Rvalue::Ref {
                     place,
                     kind: borrow_kind,

@@ -127,6 +127,15 @@ impl<K: Any, T: AstVisitable> AstVisitable for IndexMap<K, T> {
     }
 }
 
+impl AstVisitable for TyView {
+    fn drive<V: VisitAst>(&self, _v: &mut V) -> ControlFlow<V::Break> {
+        Continue(())
+    }
+    fn drive_mut<V: VisitAstMut>(&mut self, _v: &mut V) -> ControlFlow<V::Break> {
+        Continue(())
+    }
+}
+
 impl AstVisitable for View {
     fn drive<V: VisitAst>(&self, _v: &mut V) -> ControlFlow<V::Break> {
         Continue(())
@@ -196,6 +205,15 @@ pub trait BodyVisitable: Any {
     /// Visit all occurrences of that type inside `self`, in pre-order traversal.
     fn dyn_visit_in_body_mut<T: BodyVisitable>(&mut self, f: impl FnMut(&mut T)) {
         let _ = self.drive_body_mut(&mut DynVisitor::new_mut::<T>(f));
+    }
+}
+
+impl BodyVisitable for TyView {
+    fn drive_body<V: VisitBody>(&self, _v: &mut V) -> ControlFlow<V::Break> {
+        Continue(())
+    }
+    fn drive_body_mut<V: VisitBodyMut>(&mut self, _v: &mut V) -> ControlFlow<V::Break> {
+        Continue(())
     }
 }
 

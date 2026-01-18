@@ -670,16 +670,16 @@ pub enum RefKind {
     Shared,
 }
 
-pub type View = Vec<ViewField>;
+pub type TyView = Vec<TyViewField>;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, Drive, DriveMut)]
-pub struct ViewField {
+pub struct TyViewField {
     #[drive(skip)]
     pub path: Vec<String>,
     pub mutbl: RefKind,
 }
 
-impl ViewField {
+impl TyViewField {
     pub fn new(path: Vec<String>, mutbl: RefKind) -> Self {
         Self { path, mutbl }
     }
@@ -845,7 +845,7 @@ pub enum TyKind {
     Never,
     // We don't support floating point numbers on purpose (for now)
     /// A borrow
-    Ref(Region, Ty, RefKind, Option<View>),
+    Ref(Region, Ty, RefKind, Option<TyView>),
     /// A raw pointer.
     RawPtr(Ty, RefKind),
     /// A trait associated type
