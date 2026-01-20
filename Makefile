@@ -1,9 +1,14 @@
 .PHONY: all
 all: build
 
-# Path to custom rustc (modify if needed)
-CUSTOM_RUSTC_BIN ?= $(HOME)/repo/rust/build/x86_64-unknown-linux-gnu/stage2/bin/rustc
-CUSTOM_RUSTC_LIB ?= $(HOME)/repo/rust/build/x86_64-unknown-linux-gnu/stage2/lib
+
+# Path to custom rustc (derived from CUSTOM_RUSTC_STAGE2 env var)
+# If CUSTOM_RUSTC_STAGE2 is not set, this will intentionally expand
+# to an invalid path.
+CUSTOM_RUSTC_STAGE2 ?= unprovided_path_to_custom_rustc_stage2
+
+CUSTOM_RUSTC_BIN := $(CUSTOM_RUSTC_STAGE2)/bin/rustc
+CUSTOM_RUSTC_LIB := $(CUSTOM_RUSTC_STAGE2)/lib
 
 .PHONY: format
 format:
@@ -90,7 +95,7 @@ build-dev-charon-ml: charon-ml/src/CharonVersion.ml
 
 # Generate documentation
 .PHONY: doc
-doc: 
+doc:
 	cd charon && $(MAKE) doc
 	cd charon-ml && $(MAKE) doc
 
