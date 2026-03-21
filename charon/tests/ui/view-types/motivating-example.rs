@@ -1,8 +1,5 @@
 //@ charon-args=--skip-borrowck
 
-// TODO(view): We skip borrow checking because view types are not yet integrated
-// with rustc's borrow checker.
-
 // This is the motivating example from the "View Types in Rust" paper (SPLASH 2025).
 // It demonstrates the core problem that view types solve: allowing a method to
 // specify which fields it accesses, enabling disjoint field borrowing.
