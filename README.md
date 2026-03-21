@@ -101,6 +101,9 @@ make build-custom-dev
 
 # Or in release mode
 make build-custom
+
+# Run ui tests with cli arguments parsed by tests/ui.rs
+make test-ui-custom UI_TEST_ARGS="--help"
 ```
 
 This requires a custom rustc build. To set it up:
@@ -141,7 +144,7 @@ This requires a custom rustc build. To set it up:
    cd ../..
    ```
 
-You can customize the rustc path by setting `CUSTOM_RUSTC_BIN` and `CUSTOM_RUSTC_LIB` in the Makefile.
+You can customize the rustc path by setting `CUSTOM_RUSTC_STAGE2` environment variable.
 
 Run Charon with your custom rustc using the wrapper script:
 
