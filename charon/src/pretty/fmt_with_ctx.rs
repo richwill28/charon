@@ -1252,6 +1252,7 @@ impl<C: AstFormatter> FmtWithCtx<C> for Rvalue {
                 place,
                 kind: borrow_kind,
                 ptr_metadata,
+                view,
             } => {
                 let borrow_kind = match borrow_kind {
                     BorrowKind::Shared => "&",
@@ -1260,16 +1261,27 @@ impl<C: AstFormatter> FmtWithCtx<C> for Rvalue {
                     BorrowKind::UniqueImmutable => "&uniq ",
                     BorrowKind::Shallow => "&shallow ",
                 };
-                if ptr_metadata.ty().is_unit() {
-                    // Hide unit metadata
-                    write!(f, "{borrow_kind}{}", place.with_ctx(ctx))?;
-                } else {
-                    write!(
-                        f,
-                        "{borrow_kind}{} with_metadata({})",
-                        place.with_ctx(ctx),
-                        ptr_metadata.with_ctx(ctx)
-                    )?;
+                write!(f, "{borrow_kind}")?;
+                if let Some(view) = view {
+                    write!(f, "{{")?;
+                    for (i, field) in view.iter().enumerate() {
+                        if i > 0 {
+                            write!(f, ", ")?;
+                        }
+                        match field.kind {
+                            BorrowKind::Shared => {}
+                            BorrowKind::Mut => write!(f, "mut ")?,
+                            BorrowKind::TwoPhaseMut => write!(f, "two-phase-mut ")?,
+                            BorrowKind::UniqueImmutable => write!(f, "uniq ")?,
+                            BorrowKind::Shallow => write!(f, "shallow ")?,
+                        }
+                        write!(f, "{}", field.path.join("."))?;
+                    }
+                    write!(f, "}} ")?;
+                }
+                write!(f, "{}", place.with_ctx(ctx))?;
+                if !ptr_metadata.ty().is_unit() {
+                    write!(f, " with_metadata({})", ptr_metadata.with_ctx(ctx))?;
                 }
                 Ok(())
             }
@@ -1886,10 +1898,24 @@ impl<C: AstFormatter> FmtWithCtx<C> for Ty {
             TyKind::TypeVar(id) => write!(f, "{}", id.with_ctx(ctx)),
             TyKind::Literal(kind) => write!(f, "{kind}"),
             TyKind::Never => write!(f, "!"),
-            TyKind::Ref(r, ty, kind) => {
+            TyKind::Ref(r, ty, kind, view) => {
                 write!(f, "&{} ", r.with_ctx(ctx))?;
                 if let RefKind::Mut = kind {
                     write!(f, "mut ")?;
+                }
+                if let Some(view) = view {
+                    write!(f, "{{")?;
+                    for (i, field) in view.iter().enumerate() {
+                        if i > 0 {
+                            write!(f, ", ")?;
+                        }
+                        match field.mutbl {
+                            RefKind::Mut => write!(f, "mut ")?,
+                            RefKind::Shared => {}
+                        }
+                        write!(f, "{}", field.path.join("."))?;
+                    }
+                    write!(f, "}} ")?;
                 }
                 write!(f, "({})", ty.with_ctx(ctx))
             }

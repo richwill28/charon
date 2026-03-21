@@ -952,6 +952,7 @@ impl PtrMetadata {
                 Region::Static,
                 Ty::new(TyKind::Adt(type_decl_ref)),
                 RefKind::Shared,
+                None,
             )),
             PtrMetadata::InheritFrom(ty) => Ty::new(TyKind::PtrMetadata(ty)),
         }

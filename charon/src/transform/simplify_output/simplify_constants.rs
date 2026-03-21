@@ -79,6 +79,7 @@ fn transform_constant_expr(
                             place: Place::new_global(global_ref, bval.ty),
                             kind: BorrowKind::Shared,
                             ptr_metadata: Operand::Move(unit_metadata),
+                            view: None,
                         },
                         val.ty,
                     ))
@@ -100,6 +101,7 @@ fn transform_constant_expr(
                             place: bvar,
                             kind: BorrowKind::Shared,
                             ptr_metadata: Operand::Move(unit_metadata),
+                            view: None,
                         },
                         val.ty,
                     );

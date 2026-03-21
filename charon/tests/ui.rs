@@ -176,7 +176,9 @@ fn perform_test(test_case: &Case) -> anyhow::Result<()> {
         })
         .collect();
     for (crate_name, rs_path, rlib_path) in deps.iter() {
-        Command::new("rustc")
+        // Use custom rustc if RUSTC environment variable is set.
+        let rustc = std::env::var("RUSTC").unwrap_or_else(|_| "rustc".to_string());
+        Command::new(&rustc)
             .arg("--crate-type=rlib")
             .arg(format!("--crate-name={crate_name}"))
             .arg("-o")

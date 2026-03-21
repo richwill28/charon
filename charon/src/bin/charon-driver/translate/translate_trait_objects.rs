@@ -288,6 +288,7 @@ impl ItemTransCtx<'_, '_> {
                     Region::Static,
                     Ty::new(TyKind::Adt(vtbl_struct)),
                     RefKind::Shared,
+                    None,
                 ));
                 mk_field(format!("super_trait_{}", counter.next().unwrap()), ty);
             }

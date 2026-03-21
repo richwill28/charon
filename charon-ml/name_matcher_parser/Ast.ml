@@ -24,6 +24,7 @@ class ['self] map_pattern_base =
 type var = VarName of string | VarIndex of int
 and literal = LInt of big_int | LBool of bool | LChar of char
 and ref_kind = RMut | RShared
+and view_field = { path : string list; mutbl : ref_kind }
 and region = RVar of var option | RStatic
 and primitive_adt = TTuple | TArray | TSlice
 and mutability = Mut | Not
@@ -67,7 +68,7 @@ and expr =
           Note that if a type has generic arguments, they will be grouped with
           the last pattern elem. *)
   | EPrimAdt of primitive_adt * generic_args
-  | ERef of region * expr * ref_kind
+  | ERef of region * expr * ref_kind * view_field list option
   | EArrow of expr list * expr option
   | EVar of var option
   | ERawPtr of mutability * expr

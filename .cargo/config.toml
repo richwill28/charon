@@ -1,0 +1,4 @@
+# Force cargo to rebuild dependencies when using custom rustc
+[build]
+# This ensures that when we use a custom RUSTC, all dependencies get rebuilt
+rustflags = []

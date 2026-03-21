@@ -105,6 +105,20 @@ let disambiguator_to_string (c : print_config) (d : int) : string =
     | TkPattern | TkPretty -> "#" ^ string_of_int d
     | TkName -> "_" ^ string_of_int d
 
+let view_to_string (view : view_field list option) : string =
+  match view with
+  | None -> ""
+  | Some fields ->
+      let field_strs =
+        List.map
+          (fun vf ->
+            let mutbl_str = if vf.mutbl = RMut then "mut " else "" in
+            let path_str = String.concat "." vf.path in
+            mutbl_str ^ path_str)
+          fields
+      in
+      "{" ^ String.concat ", " field_strs ^ "} "
+
 let rec pattern_to_string (c : print_config) (p : pattern) : string =
   let sep =
     match c.tgt with
@@ -152,13 +166,14 @@ and expr_to_string (c : print_config) (e : expr) : string =
               | TkPattern | TkPretty -> "[" ^ ty ^ "]"
               | TkName -> "Slice" ^ ty)
           | _ -> raise (Failure "Ill-formed pattern")))
-  | ERef (r, ty, rk) ->
+  | ERef (r, ty, rk, v) ->
       let rk =
         match rk with
         | RMut -> "mut "
         | RShared -> ""
       in
-      "&" ^ region_to_string c r ^ " " ^ rk ^ expr_to_string c ty
+      "&" ^ region_to_string c r ^ " " ^ rk ^ view_to_string v
+      ^ expr_to_string c ty
   | EVar v -> opt_var_to_string c v
   | EArrow (inputs, out) -> (
       let inputs = List.map (expr_to_string c) inputs in
@@ -427,6 +442,46 @@ let match_ref_kind (prk : ref_kind) (rk : T.ref_kind) : bool =
   | RMut, RMut | RShared, RShared -> true
   | _ -> false
 
+let rec get_all_field_paths (ctx : 'fun_body ctx) (ty : T.ty) :
+    string list list option =
+  match ty with
+  | TAdt { id = TAdtId type_id; _ } -> (
+      match T.TypeDeclId.Map.find_opt type_id ctx.crate.type_decls with
+      | Some { kind = Struct fields; _ } ->
+          Some
+            (List.map (fun (f : T.field) -> [ Option.get f.field_name ]) fields)
+      | _ -> None)
+  | _ -> None
+
+let match_view (ctx : 'fun_body ctx) (pointee_ty : T.ty)
+    (pview : view_field list option) (view : T.ty_view_field list option) : bool =
+  match (pview, view) with
+  | None, None -> true
+  | None, Some vfields -> (
+      match get_all_field_paths ctx pointee_ty with
+      | None -> false
+      | Some all_paths ->
+          let vfield_paths =
+            List.map (fun (vf : T.ty_view_field) -> vf.path) vfields
+          in
+          List.for_all (fun path -> List.mem path vfield_paths) all_paths)
+  | Some pfields, None -> (
+      match get_all_field_paths ctx pointee_ty with
+      | None -> false
+      | Some all_paths ->
+          let pfield_paths = List.map (fun pf -> pf.path) pfields in
+          List.for_all (fun path -> List.mem path pfield_paths) all_paths)
+  | Some pfields, Some vfields ->
+      if List.length pfields <> List.length vfields then false
+      else
+        List.for_all
+          (fun pf ->
+            List.exists
+              (fun vf ->
+                pf.path = vf.T.path && match_ref_kind pf.mutbl vf.T.mutbl)
+              vfields)
+          pfields
+
 let match_literal (pl : literal) (l : Values.literal) : bool =
   match (pl, l) with
   | LInt pv, VScalar v -> pv = Scalars.get_val v
@@ -561,10 +616,10 @@ and match_expr_with_ty (ctx : 'fun_body ctx) (c : match_config) (m : maps)
   | EPrimAdt (pid, pgenerics), TAdt tref ->
       match_primitive_adt pid tref.id
       && match_generic_args ctx c m pgenerics tref.generics
-  | ERef (pr, pty, prk), TRef (r, ty, rk) ->
+  | ERef (pr, pty, prk, pv), TRef (r, ty, rk, v) ->
       match_region c m pr r
       && match_expr_with_ty ctx c m pty ty
-      && match_ref_kind prk rk
+      && match_ref_kind prk rk && match_view ctx ty pv v
   | EVar v, _ -> opt_update_tmap c m v ty
   | EComp pid, TTraitType (trait_ref, type_name) ->
       match_trait_type ctx c m pid trait_ref type_name
@@ -820,6 +875,16 @@ let ref_kind_to_pattern (rk : T.ref_kind) : ref_kind =
   | RMut -> RMut
   | RShared -> RShared
 
+let view_to_pattern (view : T.ty_view_field list option) : view_field list option =
+  match view with
+  | None -> None
+  | Some vfields ->
+      Some
+        (List.map
+           (fun (vf : T.ty_view_field) ->
+             { path = vf.path; mutbl = ref_kind_to_pattern vf.mutbl })
+           vfields)
+
 let lookup_var_in_maps (m : constraints)
     (lookup : 'id -> vars_map -> 'a option option) (var : 'id T.de_bruijn_var) :
     'a option =
@@ -1001,11 +1066,12 @@ and ty_to_pattern_aux (ctx : 'fun_body ctx) (c : to_pat_config)
       | TBuiltin TStr -> EComp [ PIdent ("str", 0, generics) ])
   | TVar v -> EVar (type_var_to_pattern m v)
   | TLiteral lit -> literal_type_to_pattern c lit
-  | TRef (r, ty, rk) ->
+  | TRef (r, ty, rk, v) ->
       ERef
         ( region_to_pattern m r,
           ty_to_pattern_aux ctx c m ty,
-          ref_kind_to_pattern rk )
+          ref_kind_to_pattern rk,
+          view_to_pattern v )
   | TTraitType (trait_ref, type_name) ->
       let name =
         trait_ref_item_with_generics_to_pattern ctx c m trait_ref type_name
@@ -1253,6 +1319,18 @@ let opt_var_convertible (c : conv_config) (m : conv_map) (v0 : var option)
   | Some v0, Some v1 -> var_convertible c m v0 v1
   | _ -> Error ()
 
+let views_convertible (v0 : view_field list option)
+    (v1 : view_field list option) : bool =
+  match (v0, v1) with
+  | None, None -> true
+  | Some fields0, Some fields1 ->
+      if List.length fields0 <> List.length fields1 then false
+      else
+        List.for_all2
+          (fun f0 f1 -> f0.path = f1.path && f0.mutbl = f1.mutbl)
+          fields0 fields1
+  | _ -> false
+
 (** Return the common prefix, and the divergent suffixes.
 
     The conv map is optional:
@@ -1304,8 +1382,8 @@ and expr_convertible_aux (c : conv_config) (m : conv_map) (e0 : expr)
       if p0 = [] && p1 = [] then Ok (Option.get nm) else Error ()
   | EPrimAdt (a0, g0), EPrimAdt (a1, g1) ->
       if a0 = a1 then generic_args_convertible_aux c m g0 g1 else Error ()
-  | ERef (r0, e0, rk0), ERef (r1, e1, rk1) ->
-      if rk0 = rk1 then
+  | ERef (r0, e0, rk0, v0), ERef (r1, e1, rk1, v1) ->
+      if rk0 = rk1 && views_convertible v0 v1 then
         let* m = region_convertible c m r0 r1 in
         expr_convertible_aux c m e0 e1
       else Error ()

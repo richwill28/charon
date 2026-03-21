@@ -1,0 +1,886 @@
+# Final LLBC before serialization:
+
+// Full name: core::alloc::layout::Layout
+#[lang_item("alloc_layout")]
+pub opaque type Layout
+
+// Full name: core::marker::MetaSized
+#[lang_item("meta_sized")]
+pub trait MetaSized<Self>
+
+// Full name: core::marker::Sized
+#[lang_item("sized")]
+pub trait Sized<Self>
+{
+    parent_clause0 : [@TraitClause0]: MetaSized<Self>
+    non-dyn-compatible
+}
+
+// Full name: core::clone::Clone
+#[lang_item("clone")]
+pub trait Clone<Self>
+{
+    parent_clause0 : [@TraitClause0]: Sized<Self>
+    fn clone<'_0_1> = clone<'_0_1, Self>[Self]
+    non-dyn-compatible
+}
+
+// Full name: core::clone::Clone::clone
+#[lang_item("clone_fn")]
+pub fn clone<'_0, Self>(@1: &'_0 (Self)) -> Self
+where
+    [@TraitClause0]: Clone<Self>,
+= <opaque>
+
+// Full name: core::cmp::PartialEq
+#[lang_item("eq")]
+pub trait PartialEq<Self, Rhs>
+{
+    fn eq<'_0_1, '_1_1> = core::cmp::PartialEq::eq<'_0_1, '_1_1, Self, Rhs>[Self]
+    vtable: core::cmp::PartialEq::{vtable}<Rhs>
+}
+
+#[lang_item("cmp_partialeq_eq")]
+pub fn core::cmp::PartialEq::eq<'_0, '_1, Self, Rhs>(@1: &'_0 (Self), @2: &'_1 (Rhs)) -> bool
+where
+    [@TraitClause0]: PartialEq<Self, Rhs>,
+= <opaque>
+
+// Full name: core::cmp::Eq
+#[lang_item("Eq")]
+pub trait Eq<Self>
+{
+    parent_clause0 : [@TraitClause0]: PartialEq<Self, Self>
+    non-dyn-compatible
+}
+
+// Full name: core::cmp::Ordering
+#[lang_item("Ordering")]
+pub enum Ordering {
+  Less,
+  Equal,
+  Greater,
+}
+
+// Full name: core::option::Option
+#[lang_item("Option")]
+pub enum Option<T>
+where
+    [@TraitClause0]: Sized<T>,
+{
+  None,
+  Some(T),
+}
+
+// Full name: core::cmp::PartialOrd
+#[lang_item("partial_ord")]
+pub trait PartialOrd<Self, Rhs>
+{
+    parent_clause0 : [@TraitClause0]: PartialEq<Self, Rhs>
+    fn partial_cmp<'_0_1, '_1_1> = core::cmp::PartialOrd::partial_cmp<'_0_1, '_1_1, Self, Rhs>[Self]
+    vtable: core::cmp::PartialOrd::{vtable}<Rhs>
+}
+
+// Full name: core::cmp::Ord
+#[lang_item("Ord")]
+pub trait Ord<Self>
+{
+    parent_clause0 : [@TraitClause0]: Eq<Self>
+    parent_clause1 : [@TraitClause1]: PartialOrd<Self, Self>
+    fn cmp<'_0_1, '_1_1> = core::cmp::Ord::cmp<'_0_1, '_1_1, Self>[Self]
+    non-dyn-compatible
+}
+
+#[lang_item("ord_cmp_method")]
+pub fn core::cmp::Ord::cmp<'_0, '_1, Self>(@1: &'_0 (Self), @2: &'_1 (Self)) -> Ordering
+where
+    [@TraitClause0]: Ord<Self>,
+= <opaque>
+
+#[lang_item("cmp_partialord_cmp")]
+pub fn core::cmp::PartialOrd::partial_cmp<'_0, '_1, Self, Rhs>(@1: &'_0 (Self), @2: &'_1 (Rhs)) -> Option<Ordering>[{built_in impl Sized for Ordering}]
+where
+    [@TraitClause0]: PartialOrd<Self, Rhs>,
+= <opaque>
+
+// Full name: core::cmp::impls::{impl PartialEq<i32> for i32}::eq
+pub fn {impl PartialEq<i32> for i32}::eq<'_0, '_1>(@1: &'_0 (i32), @2: &'_1 (i32)) -> bool
+= <opaque>
+
+// Full name: core::cmp::impls::{impl PartialEq<i32> for i32}
+impl PartialEq<i32> for i32 {
+    fn eq<'_0_1, '_1_1> = {impl PartialEq<i32> for i32}::eq<'_0_1, '_1_1>
+    vtable: {impl PartialEq<i32> for i32}::{vtable}
+}
+
+// Full name: core::default::Default
+#[lang_item("Default")]
+pub trait Default<Self>
+{
+    parent_clause0 : [@TraitClause0]: Sized<Self>
+    fn default = default<Self>[Self]
+    non-dyn-compatible
+}
+
+// Full name: core::default::Default::default
+#[lang_item("default_fn")]
+pub fn default<Self>() -> Self
+where
+    [@TraitClause0]: Default<Self>,
+= <opaque>
+
+// Full name: core::fmt::Arguments
+#[lang_item("format_arguments")]
+pub opaque type Arguments<'a>
+
+// Full name: core::iter::adapters::zip::TrustedRandomAccessNoCoerce
+pub trait TrustedRandomAccessNoCoerce<Self>
+{
+    parent_clause0 : [@TraitClause0]: Sized<Self>
+    const MAY_HAVE_SIDE_EFFECT : bool
+    non-dyn-compatible
+}
+
+// Full name: core::iter::traits::iterator::Iterator
+#[lang_item("iterator")]
+pub trait Iterator<Self>
+{
+    parent_clause0 : [@TraitClause0]: MetaSized<Self>
+    parent_clause1 : [@TraitClause1]: Sized<Self::Item>
+    type Item
+    fn next<'_0_1> = core::iter::traits::iterator::Iterator::next<'_0_1, Self>[Self]
+    vtable: core::iter::traits::iterator::Iterator::{vtable}<Self::Item>
+}
+
+// Full name: core::iter::traits::accum::Sum
+pub trait Sum<Self, A>
+{
+    parent_clause0 : [@TraitClause0]: Sized<Self>
+    parent_clause1 : [@TraitClause1]: Sized<A>
+    fn sum<I, [@TraitClause0_1]: Sized<I>, [@TraitClause1_1]: Iterator<I>, @TraitClause1_1::Item = A> = core::iter::traits::accum::Sum::sum<Self, A, I>[Self, @TraitClause0_1, @TraitClause1_1]
+    non-dyn-compatible
+}
+
+pub fn core::iter::traits::accum::Sum::sum<Self, A, I>(@1: I) -> Self
+where
+    [@TraitClause0]: Sum<Self, A>,
+    [@TraitClause1]: Sized<I>,
+    [@TraitClause2]: Iterator<I>,
+    @TraitClause2::Item = A,
+= <opaque>
+
+// Full name: core::iter::traits::accum::Product
+pub trait Product<Self, A>
+{
+    parent_clause0 : [@TraitClause0]: Sized<Self>
+    parent_clause1 : [@TraitClause1]: Sized<A>
+    fn product<I, [@TraitClause0_1]: Sized<I>, [@TraitClause1_1]: Iterator<I>, @TraitClause1_1::Item = A> = core::iter::traits::accum::Product::product<Self, A, I>[Self, @TraitClause0_1, @TraitClause1_1]
+    non-dyn-compatible
+}
+
+pub fn core::iter::traits::accum::Product::product<Self, A, I>(@1: I) -> Self
+where
+    [@TraitClause0]: Product<Self, A>,
+    [@TraitClause1]: Sized<I>,
+    [@TraitClause2]: Iterator<I>,
+    @TraitClause2::Item = A,
+= <opaque>
+
+// Full name: core::iter::traits::collect::IntoIterator
+#[lang_item("IntoIterator")]
+pub trait IntoIterator<Self>
+where
+    Self::parent_clause3::Item = Self::Item,
+{
+    parent_clause0 : [@TraitClause0]: MetaSized<Self>
+    parent_clause1 : [@TraitClause1]: Sized<Self::Item>
+    parent_clause2 : [@TraitClause2]: Sized<Self::IntoIter>
+    parent_clause3 : [@TraitClause3]: Iterator<Self::IntoIter>
+    type Item
+    type IntoIter
+    fn into_iter = core::iter::traits::collect::IntoIterator::into_iter<Self>[Self]
+    vtable: core::iter::traits::collect::IntoIterator::{vtable}<Self::Item, Self::IntoIter>
+}
+
+// Full name: core::iter::traits::collect::FromIterator
+#[lang_item("FromIterator")]
+pub trait FromIterator<Self, A>
+{
+    parent_clause0 : [@TraitClause0]: Sized<Self>
+    parent_clause1 : [@TraitClause1]: Sized<A>
+    fn from_iter<T, [@TraitClause0_1]: Sized<T>, [@TraitClause1_1]: IntoIterator<T>, @TraitClause1_1::Item = A> = from_iter<Self, A, T>[Self, @TraitClause0_1, @TraitClause1_1]
+    non-dyn-compatible
+}
+
+// Full name: core::iter::traits::collect::FromIterator::from_iter
+#[lang_item("from_iter_fn")]
+pub fn from_iter<Self, A, T>(@1: T) -> Self
+where
+    [@TraitClause0]: FromIterator<Self, A>,
+    [@TraitClause1]: Sized<T>,
+    [@TraitClause2]: IntoIterator<T>,
+    @TraitClause2::Item = A,
+= <opaque>
+
+#[lang_item("into_iter")]
+pub fn core::iter::traits::collect::IntoIterator::into_iter<Self>(@1: Self) -> @TraitClause0::IntoIter
+where
+    [@TraitClause0]: IntoIterator<Self>,
+= <opaque>
+
+// Full name: core::iter::traits::collect::Extend
+pub trait Extend<Self, A>
+{
+    parent_clause0 : [@TraitClause0]: MetaSized<Self>
+    parent_clause1 : [@TraitClause1]: Sized<A>
+    fn extend<'_0_1, T, [@TraitClause0_1]: Sized<T>, [@TraitClause1_1]: IntoIterator<T>, @TraitClause1_1::Item = A> = extend<'_0_1, Self, A, T>[Self, @TraitClause0_1, @TraitClause1_1]
+    non-dyn-compatible
+}
+
+// Full name: core::iter::traits::collect::Extend::extend
+pub fn extend<'_0, Self, A, T>(@1: &'_0 mut (Self), @2: T)
+where
+    [@TraitClause0]: Extend<Self, A>,
+    [@TraitClause1]: Sized<T>,
+    [@TraitClause2]: IntoIterator<T>,
+    @TraitClause2::Item = A,
+= <opaque>
+
+// Full name: core::iter::traits::double_ended::DoubleEndedIterator
+#[lang_item("DoubleEndedIterator")]
+pub trait DoubleEndedIterator<Self>
+{
+    parent_clause0 : [@TraitClause0]: MetaSized<Self>
+    parent_clause1 : [@TraitClause1]: Iterator<Self>
+    fn next_back<'_0_1> = next_back<'_0_1, Self>[Self]
+    vtable: core::iter::traits::double_ended::DoubleEndedIterator::{vtable}<Self::parent_clause1::Item>
+}
+
+// Full name: core::iter::traits::double_ended::DoubleEndedIterator::next_back
+pub fn next_back<'_0, Self>(@1: &'_0 mut (Self)) -> Option<@TraitClause0::parent_clause1::Item>[@TraitClause0::parent_clause1::parent_clause1]
+where
+    [@TraitClause0]: DoubleEndedIterator<Self>,
+= <opaque>
+
+// Full name: core::iter::traits::exact_size::ExactSizeIterator
+pub trait ExactSizeIterator<Self>
+{
+    parent_clause0 : [@TraitClause0]: MetaSized<Self>
+    parent_clause1 : [@TraitClause1]: Iterator<Self>
+    vtable: core::iter::traits::exact_size::ExactSizeIterator::{vtable}<Self::parent_clause1::Item>
+}
+
+#[lang_item("next")]
+pub fn core::iter::traits::iterator::Iterator::next<'_0, Self>(@1: &'_0 mut (Self)) -> Option<@TraitClause0::Item>[@TraitClause0::parent_clause1]
+where
+    [@TraitClause0]: Iterator<Self>,
+= <opaque>
+
+// Full name: core::marker::Copy
+#[lang_item("copy")]
+pub trait Copy<Self>
+{
+    parent_clause0 : [@TraitClause0]: MetaSized<Self>
+    parent_clause1 : [@TraitClause1]: Clone<Self>
+    non-dyn-compatible
+}
+
+// Full name: core::marker::Destruct
+#[lang_item("destruct")]
+pub trait Destruct<Self>
+{
+    fn drop_in_place = core::marker::Destruct::drop_in_place<Self>
+    vtable: core::marker::Destruct::{vtable}
+}
+
+fn core::marker::Destruct::drop_in_place<Self>(@1: *mut Self)
+= <opaque>
+
+// Full name: core::marker::Tuple
+#[lang_item("tuple_trait")]
+pub trait Tuple<Self>
+{
+    parent_clause0 : [@TraitClause0]: MetaSized<Self>
+    vtable: core::marker::Tuple::{vtable}
+}
+
+// Full name: core::mem::SizedTypeProperties
+pub trait SizedTypeProperties<Self>
+{
+    parent_clause0 : [@TraitClause0]: Sized<Self>
+    const SIZE : usize
+    const ALIGN : usize
+    const IS_ZST : bool
+    const LAYOUT : Layout
+    const MAX_SLICE_LEN : usize
+    non-dyn-compatible
+}
+
+// Full name: core::mem::SizedTypeProperties::SIZE
+#[lang_item("mem_size_const")]
+pub fn SIZE<Self>() -> usize
+where
+    [@TraitClause0]: SizedTypeProperties<Self>,
+= <opaque>
+
+// Full name: core::mem::SizedTypeProperties::SIZE
+#[lang_item("mem_size_const")]
+pub const SIZE<Self>: usize
+where
+    [@TraitClause0]: SizedTypeProperties<Self>,
+ = SIZE()
+
+// Full name: core::mem::SizedTypeProperties::ALIGN
+#[lang_item("mem_align_const")]
+pub fn ALIGN<Self>() -> usize
+where
+    [@TraitClause0]: SizedTypeProperties<Self>,
+= <opaque>
+
+// Full name: core::mem::SizedTypeProperties::ALIGN
+#[lang_item("mem_align_const")]
+pub const ALIGN<Self>: usize
+where
+    [@TraitClause0]: SizedTypeProperties<Self>,
+ = ALIGN()
+
+// Full name: core::mem::SizedTypeProperties::IS_ZST
+pub fn IS_ZST<Self>() -> bool
+where
+    [@TraitClause0]: SizedTypeProperties<Self>,
+= <opaque>
+
+// Full name: core::mem::SizedTypeProperties::IS_ZST
+pub const IS_ZST<Self>: bool
+where
+    [@TraitClause0]: SizedTypeProperties<Self>,
+ = IS_ZST()
+
+// Full name: core::mem::SizedTypeProperties::LAYOUT
+pub fn LAYOUT<Self>() -> Layout
+where
+    [@TraitClause0]: SizedTypeProperties<Self>,
+= <opaque>
+
+// Full name: core::mem::SizedTypeProperties::LAYOUT
+pub const LAYOUT<Self>: Layout
+where
+    [@TraitClause0]: SizedTypeProperties<Self>,
+ = LAYOUT()
+
+// Full name: core::mem::SizedTypeProperties::MAX_SLICE_LEN
+pub fn MAX_SLICE_LEN<Self>() -> usize
+where
+    [@TraitClause0]: SizedTypeProperties<Self>,
+= <opaque>
+
+// Full name: core::mem::SizedTypeProperties::MAX_SLICE_LEN
+pub const MAX_SLICE_LEN<Self>: usize
+where
+    [@TraitClause0]: SizedTypeProperties<Self>,
+ = MAX_SLICE_LEN()
+
+// Full name: core::mem::{impl SizedTypeProperties for T}
+impl<T> SizedTypeProperties for T
+where
+    [@TraitClause0]: Sized<T>,
+{
+    parent_clause0 = @TraitClause0
+    const SIZE = SIZE<T>[{impl SizedTypeProperties for T}<T>[@TraitClause0]]
+    const ALIGN = ALIGN<T>[{impl SizedTypeProperties for T}<T>[@TraitClause0]]
+    const IS_ZST = IS_ZST<T>[{impl SizedTypeProperties for T}<T>[@TraitClause0]]
+    const LAYOUT = LAYOUT<T>[{impl SizedTypeProperties for T}<T>[@TraitClause0]]
+    const MAX_SLICE_LEN = MAX_SLICE_LEN<T>[{impl SizedTypeProperties for T}<T>[@TraitClause0]]
+    non-dyn-compatible
+}
+
+// Full name: core::ops::control_flow::ControlFlow
+#[lang_item("ControlFlow")]
+pub enum ControlFlow<B, C>
+where
+    [@TraitClause0]: Sized<B>,
+    [@TraitClause1]: Sized<C>,
+{
+  Continue(C),
+  Break(B),
+}
+
+// Full name: core::ops::function::FnOnce
+#[lang_item("fn_once")]
+pub trait FnOnce<Self, Args>
+{
+    parent_clause0 : [@TraitClause0]: MetaSized<Self>
+    parent_clause1 : [@TraitClause1]: Sized<Args>
+    parent_clause2 : [@TraitClause2]: Tuple<Args>
+    parent_clause3 : [@TraitClause3]: Sized<Self::Output>
+    type Output
+    fn call_once = call_once<Self, Args>[Self]
+    vtable: core::ops::function::FnOnce::{vtable}<Args, Self::Output>
+}
+
+// Full name: core::ops::function::FnMut
+#[lang_item("fn_mut")]
+pub trait FnMut<Self, Args>
+{
+    parent_clause0 : [@TraitClause0]: MetaSized<Self>
+    parent_clause1 : [@TraitClause1]: FnOnce<Self, Args>
+    parent_clause2 : [@TraitClause2]: Sized<Args>
+    parent_clause3 : [@TraitClause3]: Tuple<Args>
+    fn call_mut<'_0_1> = call_mut<'_0_1, Self, Args>[Self]
+    vtable: core::ops::function::FnMut::{vtable}<Args, Self::parent_clause1::Output>
+}
+
+// Full name: core::ops::function::FnMut::call_mut
+pub fn call_mut<'_0, Self, Args>(@1: &'_0 mut (Self), @2: Args) -> @TraitClause0::parent_clause1::Output
+where
+    [@TraitClause0]: FnMut<Self, Args>,
+= <opaque>
+
+// Full name: core::ops::function::FnOnce::call_once
+pub fn call_once<Self, Args>(@1: Self, @2: Args) -> @TraitClause0::Output
+where
+    [@TraitClause0]: FnOnce<Self, Args>,
+= <opaque>
+
+// Full name: core::ops::try_trait::FromResidual
+#[lang_item("FromResidual")]
+pub trait FromResidual<Self, R>
+{
+    parent_clause0 : [@TraitClause0]: MetaSized<Self>
+    parent_clause1 : [@TraitClause1]: Sized<R>
+    fn from_residual = from_residual<Self, R>[Self]
+    non-dyn-compatible
+}
+
+// Full name: core::ops::try_trait::Try
+#[lang_item("Try")]
+pub trait Try<Self>
+{
+    parent_clause0 : [@TraitClause0]: MetaSized<Self>
+    parent_clause1 : [@TraitClause1]: FromResidual<Self, Self::Residual>
+    parent_clause2 : [@TraitClause2]: Sized<Self::Output>
+    parent_clause3 : [@TraitClause3]: Sized<Self::Residual>
+    type Output
+    type Residual
+    fn from_output = from_output<Self>[Self]
+    fn branch = branch<Self>[Self]
+    non-dyn-compatible
+}
+
+// Full name: core::ops::try_trait::Try::from_output
+#[lang_item("from_output")]
+pub fn from_output<Self>(@1: @TraitClause0::Output) -> Self
+where
+    [@TraitClause0]: Try<Self>,
+= <opaque>
+
+// Full name: core::ops::try_trait::Try::branch
+#[lang_item("branch")]
+pub fn branch<Self>(@1: Self) -> ControlFlow<@TraitClause0::Residual, @TraitClause0::Output>[@TraitClause0::parent_clause1::parent_clause1, @TraitClause0::parent_clause2]
+where
+    [@TraitClause0]: Try<Self>,
+= <opaque>
+
+// Full name: core::ops::try_trait::FromResidual::from_residual
+#[lang_item("from_residual")]
+pub fn from_residual<Self, R>(@1: R) -> Self
+where
+    [@TraitClause0]: FromResidual<Self, R>,
+= <opaque>
+
+// Full name: core::ops::try_trait::Residual
+pub trait Residual<Self, O>
+where
+    Self::parent_clause3::Output = O,
+    Self::parent_clause3::Residual = Self,
+{
+    parent_clause0 : [@TraitClause0]: Sized<Self>
+    parent_clause1 : [@TraitClause1]: Sized<O>
+    parent_clause2 : [@TraitClause2]: Sized<Self::TryType>
+    parent_clause3 : [@TraitClause3]: Try<Self::TryType>
+    type TryType
+    non-dyn-compatible
+}
+
+// Full name: core::panicking::AssertKind
+pub enum AssertKind {
+  Eq,
+  Ne,
+  Match,
+}
+
+// Full name: core::slice::iter::IterMut
+pub opaque type IterMut<'a, T>
+where
+    [@TraitClause0]: Sized<T>,
+    T : 'a,
+    T : 'a,
+
+// Full name: core::slice::iter::{impl Iterator for IterMut<'a, T>[@TraitClause0]}::next
+pub fn {impl Iterator for IterMut<'a, T>[@TraitClause0]}::next<'a, '_1, T>(@1: &'_1 mut (IterMut<'a, T>[@TraitClause0])) -> Option<&'a mut (T)>[{built_in impl Sized for &'_ mut (T)}]
+where
+    [@TraitClause0]: Sized<T>,
+= <opaque>
+
+// Full name: core::slice::iter::{impl Iterator for IterMut<'a, T>[@TraitClause0]}
+impl<'a, T> Iterator for IterMut<'a, T>[@TraitClause0]
+where
+    [@TraitClause0]: Sized<T>,
+{
+    parent_clause0 = {built_in impl MetaSized for IterMut<'_, T>[@TraitClause0]}
+    parent_clause1 = {built_in impl Sized for &'_ mut (T)}
+    type Item = &'a mut (T)
+    fn next<'_0_1> = {impl Iterator for IterMut<'a, T>[@TraitClause0]}::next<'a, '_0_1, T>[@TraitClause0]
+    vtable: {impl Iterator for IterMut<'a, T>[@TraitClause0]}::{vtable}<'a, T>[@TraitClause0]
+}
+
+// Full name: alloc::alloc::Global
+#[lang_item("global_alloc_ty")]
+pub struct Global {}
+
+// Full name: alloc::alloc::exchange_malloc
+#[lang_item("exchange_malloc")]
+unsafe fn exchange_malloc(@1: usize, @2: usize) -> *mut u8
+= <opaque>
+
+// Full name: alloc::boxed::Box::{impl Destruct for alloc::boxed::Box<T>[@TraitClause0, @TraitClause1]}::drop_in_place
+fn {impl Destruct for alloc::boxed::Box<T>[@TraitClause0, @TraitClause1]}::drop_in_place<T, A>(@1: *mut alloc::boxed::Box<T>[@TraitClause0, @TraitClause1])
+where
+    [@TraitClause0]: MetaSized<T>,
+    [@TraitClause1]: Sized<A>,
+= <opaque>
+
+// Full name: alloc::boxed::Box::{impl Destruct for alloc::boxed::Box<T>[@TraitClause0, @TraitClause1]}
+impl<T, A> Destruct for alloc::boxed::Box<T>[@TraitClause0, @TraitClause1]
+where
+    [@TraitClause0]: MetaSized<T>,
+    [@TraitClause1]: Sized<A>,
+{
+    fn drop_in_place = {impl Destruct for alloc::boxed::Box<T>[@TraitClause0, @TraitClause1]}::drop_in_place<T, A>[@TraitClause0, @TraitClause1]
+    non-dyn-compatible
+}
+
+// Full name: alloc::vec::Vec
+#[lang_item("Vec")]
+pub opaque type Vec<T>
+where
+    [@TraitClause0]: Sized<T>,
+    [@TraitClause1]: Sized<type_error("removed allocator parameter")>,
+
+// Full name: alloc::slice::{Slice<T>}::into_vec
+#[lang_item("slice_into_vec")]
+pub fn into_vec<T, A>(@1: alloc::boxed::Box<Slice<T>>[{built_in impl MetaSized for Slice<T>}, @TraitClause1]) -> Vec<T>[@TraitClause0, @TraitClause1]
+where
+    [@TraitClause0]: Sized<T>,
+    [@TraitClause1]: Sized<A>,
+= <opaque>
+
+// Full name: alloc::vec::Vec::{impl Destruct for Vec<T>[@TraitClause0, @TraitClause1]}::drop_in_place
+fn {impl Destruct for Vec<T>[@TraitClause0, @TraitClause1]}::drop_in_place<T, A>(@1: *mut Vec<T>[@TraitClause0, @TraitClause1])
+where
+    [@TraitClause0]: Sized<T>,
+    [@TraitClause1]: Sized<A>,
+= <opaque>
+
+// Full name: alloc::vec::Vec::{impl Destruct for Vec<T>[@TraitClause0, @TraitClause1]}
+impl<T, A> Destruct for Vec<T>[@TraitClause0, @TraitClause1]
+where
+    [@TraitClause0]: Sized<T>,
+    [@TraitClause1]: Sized<A>,
+{
+    fn drop_in_place = {impl Destruct for Vec<T>[@TraitClause0, @TraitClause1]}::drop_in_place<T, A>[@TraitClause0, @TraitClause1]
+    non-dyn-compatible
+}
+
+// Full name: alloc::vec::{impl IntoIterator for &'a mut (Vec<T>[@TraitClause0, @TraitClause1])}::into_iter
+pub fn {impl IntoIterator for &'a mut (Vec<T>[@TraitClause0, @TraitClause1])}::into_iter<'a, T, A>(@1: &'a mut (Vec<T>[@TraitClause0, @TraitClause1])) -> IterMut<'a, T>[@TraitClause0]
+where
+    [@TraitClause0]: Sized<T>,
+    [@TraitClause1]: Sized<A>,
+= <opaque>
+
+// Full name: alloc::vec::{impl IntoIterator for &'a mut (Vec<T>[@TraitClause0, @TraitClause1])}
+impl<'a, T, A> IntoIterator for &'a mut (Vec<T>[@TraitClause0, @TraitClause1])
+where
+    [@TraitClause0]: Sized<T>,
+    [@TraitClause1]: Sized<A>,
+{
+    parent_clause0 = {built_in impl MetaSized for &'_ mut (Vec<T>[@TraitClause0, @TraitClause1])}
+    parent_clause1 = {built_in impl Sized for &'_ mut (T)}
+    parent_clause2 = {built_in impl Sized for IterMut<'_, T>[@TraitClause0]}
+    parent_clause3 = {impl Iterator for IterMut<'a, T>[@TraitClause0]}<'_, T>[@TraitClause0]
+    type Item = &'a mut (T)
+    type IntoIter = IterMut<'a, T>[@TraitClause0]
+    fn into_iter = {impl IntoIterator for &'a mut (Vec<T>[@TraitClause0, @TraitClause1])}::into_iter<'a, T, A>[@TraitClause0, @TraitClause1]
+    vtable: {impl IntoIterator for &'a mut (Vec<T>[@TraitClause0, @TraitClause1])}::{vtable}<'a, T, A>[@TraitClause0, @TraitClause1]
+}
+
+// Full name: alloc::vec::partial_eq::{impl PartialEq<Vec<U>[@TraitClause1, @TraitClause3]> for Vec<T>[@TraitClause0, @TraitClause2]}::eq
+pub fn {impl PartialEq<Vec<U>[@TraitClause1, @TraitClause3]> for Vec<T>[@TraitClause0, @TraitClause2]}::eq<'_0, '_1, T, U, A1, A2>(@1: &'_0 (Vec<T>[@TraitClause0, @TraitClause2]), @2: &'_1 (Vec<U>[@TraitClause1, @TraitClause3])) -> bool
+where
+    [@TraitClause0]: Sized<T>,
+    [@TraitClause1]: Sized<U>,
+    [@TraitClause2]: Sized<A1>,
+    [@TraitClause3]: Sized<A2>,
+    [@TraitClause6]: PartialEq<T, U>,
+= <opaque>
+
+// Full name: alloc::vec::partial_eq::{impl PartialEq<Vec<U>[@TraitClause1, @TraitClause3]> for Vec<T>[@TraitClause0, @TraitClause2]}
+impl<T, U, A1, A2> PartialEq<Vec<U>[@TraitClause1, @TraitClause3]> for Vec<T>[@TraitClause0, @TraitClause2]
+where
+    [@TraitClause0]: Sized<T>,
+    [@TraitClause1]: Sized<U>,
+    [@TraitClause2]: Sized<A1>,
+    [@TraitClause3]: Sized<A2>,
+    [@TraitClause6]: PartialEq<T, U>,
+{
+    fn eq<'_0_1, '_1_1> = {impl PartialEq<Vec<U>[@TraitClause1, @TraitClause3]> for Vec<T>[@TraitClause0, @TraitClause2]}::eq<'_0_1, '_1_1, T, U, A1, A2>[@TraitClause0, @TraitClause1, @TraitClause2, @TraitClause3, @TraitClause6]
+    vtable: {impl PartialEq<Vec<U>[@TraitClause1, @TraitClause3]> for Vec<T>[@TraitClause0, @TraitClause2]}::{vtable}<T, U, A1, A2>[@TraitClause0, @TraitClause1, @TraitClause2, @TraitClause3, @TraitClause6]
+}
+
+fn UNIT_METADATA()
+{
+    let @0: (); // return
+
+    @0 := ()
+    return
+}
+
+const UNIT_METADATA: () = @Fun0()
+
+// Full name: test_crate::S
+struct S {
+  next_id: usize,
+  data: Vec<i32>[{built_in impl Sized for i32}, {built_in impl Sized for Global}],
+}
+
+// Full name: test_crate::S::{impl Destruct for S}::drop_in_place
+fn {impl Destruct for S}::drop_in_place(@1: *mut S)
+{
+    let @0: (); // return
+    let @1: *mut S; // arg #1
+    let @2: &'_ mut (S); // anonymous local
+
+    storage_live(@2)
+    @0 := ()
+    @2 := &mut *(@1)
+    drop[{impl Destruct for Vec<T>[@TraitClause0, @TraitClause1]}<i32, Global>[{built_in impl Sized for i32}, {built_in impl Sized for Global}]] (*(@2)).data
+    return
+}
+
+// Full name: test_crate::S::{impl Destruct for S}
+impl Destruct for S {
+    fn drop_in_place = {impl Destruct for S}::drop_in_place
+    non-dyn-compatible
+}
+
+// Full name: test_crate::{S}::new_id
+fn new_id<'_0>(@1: &'_0 mut {mut next_id} (S)) -> usize
+{
+    let @0: usize; // return
+    let self@1: &'_ mut {mut next_id} (S); // arg #1
+    let i@2: usize; // local
+    let @3: usize; // anonymous local
+
+    storage_live(@3)
+    storage_live(i@2)
+    i@2 := copy ((*(self@1)).next_id)
+    @3 := copy ((*(self@1)).next_id) panic.+ const (1 : usize)
+    (*(self@1)).next_id := move (@3)
+    @0 := copy (i@2)
+    storage_dead(i@2)
+    return
+}
+
+// Full name: test_crate::{S}::assign_ids
+fn assign_ids<'_0>(@1: &'_0 mut (S))
+{
+    let @0: (); // return
+    let self@1: &'_ mut (S); // arg #1
+    let @2: IterMut<'_, i32>[{built_in impl Sized for i32}]; // anonymous local
+    let @3: &'_ mut (Vec<i32>[{built_in impl Sized for i32}, {built_in impl Sized for Global}]); // anonymous local
+    let iter@4: IterMut<'_, i32>[{built_in impl Sized for i32}]; // local
+    let @5: Option<&'_ mut (i32)>[{built_in impl Sized for &'_ mut (i32)}]; // anonymous local
+    let @6: &'_ mut (IterMut<'_, i32>[{built_in impl Sized for i32}]); // anonymous local
+    let @7: &'_ mut (IterMut<'_, i32>[{built_in impl Sized for i32}]); // anonymous local
+    let item@8: &'_ mut (i32); // local
+    let id@9: usize; // local
+    let @10: &'_ mut {mut next_id} (S); // anonymous local
+    let @11: usize; // anonymous local
+
+    @0 := ()
+    storage_live(@2)
+    storage_live(@3)
+    @3 := &mut (*(self@1)).data
+    @2 := {impl IntoIterator for &'a mut (Vec<T>[@TraitClause0, @TraitClause1])}::into_iter<'_, i32, Global>[{built_in impl Sized for i32}, {built_in impl Sized for Global}](move (@3))
+    storage_dead(@3)
+    storage_live(iter@4)
+    iter@4 := move (@2)
+    loop {
+        storage_live(@5)
+        storage_live(@6)
+        storage_live(@7)
+        @7 := &mut iter@4
+        @6 := &two-phase-mut *(@7)
+        @5 := {impl Iterator for IterMut<'a, T>[@TraitClause0]}::next<'_, '_, i32>[{built_in impl Sized for i32}](move (@6))
+        storage_dead(@6)
+        match @5 {
+            Option::None => {
+                break 0
+            },
+            Option::Some => {
+                storage_live(item@8)
+                item@8 := move ((@5 as variant Option::Some).0)
+                storage_live(id@9)
+                storage_live(@10)
+                @10 := &two-phase-mut {two-phase-mut next_id} *(self@1)
+                id@9 := new_id<'_>(move (@10))
+                storage_dead(@10)
+                storage_live(@11)
+                @11 := copy (id@9)
+                *(item@8) := cast<usize, i32>(move (@11))
+                storage_dead(@11)
+                storage_dead(id@9)
+                storage_dead(item@8)
+                storage_dead(@7)
+                storage_dead(@5)
+                continue 0
+            },
+        }
+    }
+    @0 := ()
+    storage_dead(@7)
+    storage_dead(@5)
+    storage_dead(iter@4)
+    storage_dead(@2)
+    return
+}
+
+// Full name: test_crate::main
+fn main()
+{
+    let @0: (); // return
+    let s@1: S; // local
+    let @2: Vec<i32>[{built_in impl Sized for i32}, {built_in impl Sized for Global}]; // anonymous local
+    let @3: alloc::boxed::Box<Slice<i32>>[{built_in impl MetaSized for Slice<i32>}, {built_in impl Sized for Global}]; // anonymous local
+    let @4: alloc::boxed::Box<Array<i32, 3 : usize>>[{built_in impl MetaSized for Array<i32, 3 : usize>}, {built_in impl Sized for Global}]; // anonymous local
+    let @5: alloc::boxed::Box<Array<i32, 3 : usize>>[{built_in impl MetaSized for Array<i32, 3 : usize>}, {built_in impl Sized for Global}]; // anonymous local
+    let @6: (); // anonymous local
+    let @7: &'_ mut (S); // anonymous local
+    let @8: (&'_ (Vec<i32>[{built_in impl Sized for i32}, {built_in impl Sized for Global}]), &'_ (Vec<i32>[{built_in impl Sized for i32}, {built_in impl Sized for Global}])); // anonymous local
+    let @9: &'_ (Vec<i32>[{built_in impl Sized for i32}, {built_in impl Sized for Global}]); // anonymous local
+    let @10: &'_ (Vec<i32>[{built_in impl Sized for i32}, {built_in impl Sized for Global}]); // anonymous local
+    let @11: Vec<i32>[{built_in impl Sized for i32}, {built_in impl Sized for Global}]; // anonymous local
+    let @12: alloc::boxed::Box<Slice<i32>>[{built_in impl MetaSized for Slice<i32>}, {built_in impl Sized for Global}]; // anonymous local
+    let @13: alloc::boxed::Box<Array<i32, 3 : usize>>[{built_in impl MetaSized for Array<i32, 3 : usize>}, {built_in impl Sized for Global}]; // anonymous local
+    let @14: alloc::boxed::Box<Array<i32, 3 : usize>>[{built_in impl MetaSized for Array<i32, 3 : usize>}, {built_in impl Sized for Global}]; // anonymous local
+    let left_val@15: &'_ (Vec<i32>[{built_in impl Sized for i32}, {built_in impl Sized for Global}]); // local
+    let right_val@16: &'_ (Vec<i32>[{built_in impl Sized for i32}, {built_in impl Sized for Global}]); // local
+    let @17: bool; // anonymous local
+    let @18: &'_ (Vec<i32>[{built_in impl Sized for i32}, {built_in impl Sized for Global}]); // anonymous local
+    let @19: &'_ (Vec<i32>[{built_in impl Sized for i32}, {built_in impl Sized for Global}]); // anonymous local
+    let kind@20: AssertKind; // local
+    let @21: AssertKind; // anonymous local
+    let @22: &'_ (Vec<i32>[{built_in impl Sized for i32}, {built_in impl Sized for Global}]); // anonymous local
+    let @23: &'_ (Vec<i32>[{built_in impl Sized for i32}, {built_in impl Sized for Global}]); // anonymous local
+    let @24: &'_ (Vec<i32>[{built_in impl Sized for i32}, {built_in impl Sized for Global}]); // anonymous local
+    let @25: &'_ (Vec<i32>[{built_in impl Sized for i32}, {built_in impl Sized for Global}]); // anonymous local
+    let @26: Option<Arguments<'_>>[{built_in impl Sized for Arguments<'_>}]; // anonymous local
+    let @27: Array<i32, 3 : usize>; // anonymous local
+    let @28: Array<i32, 3 : usize>; // anonymous local
+
+    @0 := ()
+    storage_live(s@1)
+    storage_live(@2)
+    storage_live(@3)
+    storage_live(@4)
+    storage_live(@27)
+    @27 := @ArrayRepeat<'_, i32, 3 : usize>(const (0 : i32))
+    storage_live(@5)
+    @5 := @BoxNew<Array<i32, 3 : usize>>[{built_in impl MetaSized for Array<i32, 3 : usize>}, {built_in impl Sized for Global}](move (@27))
+    @4 := move (@5)
+    @3 := unsize_cast<alloc::boxed::Box<Array<i32, 3 : usize>>[{built_in impl MetaSized for Array<i32, 3 : usize>}, {built_in impl Sized for Global}], alloc::boxed::Box<Slice<i32>>[{built_in impl MetaSized for Slice<i32>}, {built_in impl Sized for Global}], 3 : usize>(move (@4))
+    drop[{impl Destruct for alloc::boxed::Box<T>[@TraitClause0, @TraitClause1]}<Array<i32, 3 : usize>, Global>[{built_in impl MetaSized for Array<i32, 3 : usize>}, {built_in impl Sized for Global}]] @4
+    drop[{impl Destruct for alloc::boxed::Box<T>[@TraitClause0, @TraitClause1]}<Array<i32, 3 : usize>, Global>[{built_in impl MetaSized for Array<i32, 3 : usize>}, {built_in impl Sized for Global}]] @5
+    storage_dead(@5)
+    storage_dead(@4)
+    @2 := into_vec<i32, Global>[{built_in impl Sized for i32}, {built_in impl Sized for Global}](move (@3))
+    storage_dead(@3)
+    s@1 := S { next_id: const (0 : usize), data: move (@2) }
+    drop[{impl Destruct for Vec<T>[@TraitClause0, @TraitClause1]}<i32, Global>[{built_in impl Sized for i32}, {built_in impl Sized for Global}]] @2
+    storage_dead(@2)
+    storage_live(@6)
+    storage_live(@7)
+    @7 := &two-phase-mut s@1
+    @6 := assign_ids<'_>(move (@7))
+    storage_dead(@7)
+    storage_dead(@6)
+    storage_live(@8)
+    storage_live(@9)
+    @9 := &(s@1).data
+    storage_live(@10)
+    storage_live(@11)
+    storage_live(@12)
+    storage_live(@13)
+    storage_live(@28)
+    @28 := [const (0 : i32), const (1 : i32), const (2 : i32)]
+    storage_live(@14)
+    @14 := @BoxNew<Array<i32, 3 : usize>>[{built_in impl MetaSized for Array<i32, 3 : usize>}, {built_in impl Sized for Global}](move (@28))
+    @13 := move (@14)
+    @12 := unsize_cast<alloc::boxed::Box<Array<i32, 3 : usize>>[{built_in impl MetaSized for Array<i32, 3 : usize>}, {built_in impl Sized for Global}], alloc::boxed::Box<Slice<i32>>[{built_in impl MetaSized for Slice<i32>}, {built_in impl Sized for Global}], 3 : usize>(move (@13))
+    drop[{impl Destruct for alloc::boxed::Box<T>[@TraitClause0, @TraitClause1]}<Array<i32, 3 : usize>, Global>[{built_in impl MetaSized for Array<i32, 3 : usize>}, {built_in impl Sized for Global}]] @13
+    drop[{impl Destruct for alloc::boxed::Box<T>[@TraitClause0, @TraitClause1]}<Array<i32, 3 : usize>, Global>[{built_in impl MetaSized for Array<i32, 3 : usize>}, {built_in impl Sized for Global}]] @14
+    storage_dead(@14)
+    storage_dead(@13)
+    @11 := into_vec<i32, Global>[{built_in impl Sized for i32}, {built_in impl Sized for Global}](move (@12))
+    storage_dead(@12)
+    @10 := &@11
+    @8 := (move (@9), move (@10))
+    storage_dead(@10)
+    storage_dead(@9)
+    storage_live(left_val@15)
+    left_val@15 := copy ((@8).0)
+    storage_live(right_val@16)
+    right_val@16 := copy ((@8).1)
+    storage_live(@17)
+    storage_live(@18)
+    @18 := &*(left_val@15)
+    storage_live(@19)
+    @19 := &*(right_val@16)
+    @17 := {impl PartialEq<Vec<U>[@TraitClause1, @TraitClause3]> for Vec<T>[@TraitClause0, @TraitClause2]}::eq<'_, '_, i32, i32, Global, Global>[{built_in impl Sized for i32}, {built_in impl Sized for i32}, {built_in impl Sized for Global}, {built_in impl Sized for Global}, {impl PartialEq<i32> for i32}](move (@18), move (@19))
+    if move (@17) {
+    } else {
+        storage_dead(@19)
+        storage_dead(@18)
+        storage_live(kind@20)
+        kind@20 := AssertKind::Eq {  }
+        storage_live(@21)
+        @21 := move (kind@20)
+        storage_live(@22)
+        storage_live(@23)
+        @23 := &*(left_val@15)
+        @22 := &*(@23)
+        storage_live(@24)
+        storage_live(@25)
+        @25 := &*(right_val@16)
+        @24 := &*(@25)
+        storage_live(@26)
+        @26 := Option::None {  }
+        panic(core::panicking::assert_failed)
+    }
+    storage_dead(@19)
+    storage_dead(@18)
+    storage_dead(@17)
+    storage_dead(right_val@16)
+    storage_dead(left_val@15)
+    drop[{impl Destruct for Vec<T>[@TraitClause0, @TraitClause1]}<i32, Global>[{built_in impl Sized for i32}, {built_in impl Sized for Global}]] @11
+    storage_dead(@11)
+    storage_dead(@8)
+    @0 := ()
+    drop[{impl Destruct for S}] s@1
+    storage_dead(s@1)
+    return
+}
+
+
+

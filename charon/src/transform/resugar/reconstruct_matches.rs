@@ -153,7 +153,7 @@ impl Transform {
                         && discriminant_intrinsics.contains(fun_id)
                         // passing it a reference.
                         && let Operand::Move(p) = &call.args[0]
-                        && let TyKind::Ref(_, sub_ty, _) = p.ty().kind() =>
+                        && let TyKind::Ref(_, sub_ty, _, _) = p.ty().kind() =>
                 {
                     let p = p.clone().project(ProjectionElem::Deref, sub_ty.clone());
                     block.statements[i].kind =

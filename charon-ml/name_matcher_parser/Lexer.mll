@@ -38,6 +38,7 @@ rule token = parse
   | "->" { ARROW }
   | '*' { STAR }
   | "#" { HASH }
+  | '.' { DOT }
   | _ { raise (Failure ("Character not allowed in source text: '" ^ Lexing.lexeme lexbuf ^ "'")) }
 
 and index = parse
